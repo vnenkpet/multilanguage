@@ -11,6 +11,10 @@ use Yii;
 use yii\db\Query;
 use yii\validators\Validator;
 
+/**
+ * Class MultiLanguageBehavior
+ * @package webvimark\behaviors\multilanguage
+ */
 class MultiLanguageBehavior extends Behavior
 {
 	public $mlConfig;
@@ -93,7 +97,7 @@ class MultiLanguageBehavior extends Behavior
 	}
 
 	/**
-	 * Checks if the user is in an admin route
+	 * Checks if the user is in an admin route. Can use wildcards (*)
 	 * @return bool
 	 */
 	private function checkAdminRoute()
@@ -103,7 +107,11 @@ class MultiLanguageBehavior extends Behavior
 			$val = trim($val, '/');
 		});
 
-		return in_array(Yii::$app->requestedRoute, $this->mlConfig['admin_routes']);
+		$routes = $this->mlConfig['admin_routes'];
+		foreach($routes as $route) {
+			if(fnmatch($route, Yii::$app->requestedRoute)) return true;
+		}
+		return false;
 	}
 
 	/**
