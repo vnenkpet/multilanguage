@@ -93,6 +93,20 @@ class MultiLanguageBehavior extends Behavior
 	}
 
 	/**
+	 * Checks if the user is in an admin route
+	 * @return bool
+	 */
+	private function checkAdminRoute()
+	{
+		// Remove unnecessary "/" from admin routes
+		array_walk($this->mlConfig['admin_routes'], function(&$val, $key) {
+			$val = trim($val, '/');
+		});
+
+		return in_array(Yii::$app->requestedRoute, $this->mlConfig['admin_routes']);
+	}
+
+	/**
 	 * Initialize virtual attributes and fill them with translated values
 	 *
 	 * If requested route is not an admin route and active language != default language
@@ -104,17 +118,12 @@ class MultiLanguageBehavior extends Behavior
 	{
 		$this->mlInitializeAttributes();
 
-		if ( Yii::$app->language == $this->mlConfig['default_language'] OR in_array(Yii::$app->requestedRoute, $this->mlConfig['admin_routes']) )
+		if ( Yii::$app->language == $this->mlConfig['default_language'] OR $this->checkAdminRoute() )
 		{
 			$this->_replaceOriginalAttributes = false;
 		}
 
-		// Remove unnecessary "/" from admin routes
-		array_walk($this->mlConfig['admin_routes'], function(&$val, $key) {
-			$val = trim($val, '/');
-		});
-
-		if ( in_array(Yii::$app->requestedRoute, $this->mlConfig['admin_routes']) )
+		if ( $this->checkAdminRoute() )
 		{
 			$translations = $this->mlGetTranslations();
 		}
